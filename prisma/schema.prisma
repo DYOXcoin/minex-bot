@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskType {
+  TELEGRAM_CHANNEL
+  URL_VISIT
+  REFERRAL_COUNT
+  DAILY
+  CUSTOM
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+  FAILED
+}
+
+enum AirdropStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+}
+
+model User {
+  id              String   @id @default(cuid())
+  telegramId      BigInt   @unique
+  username        String?
+  firstName       String?
+  lastName        String?
+  languageCode    String?
+  points          BigInt   @default(0)
+  lifetimePoints  BigInt   @default(0)
+  level           Int      @default(1)
+  energy          Int      @default(1000)
+  maxEnergy       Int      @default(1000)
+  lastEnergyAt    DateTime @default(now())
+  lastTapAt       DateTime?
+  lastDailyAt     DateTime?
+  streak           Int      @default(0)
+  referredById    String?
+  referredBy      User?    @relation("ReferralTree", fields: [referredById], references: [id])
+  referrals       User[]   @relation("ReferralTree")
+  referralCode    String   @unique
+  walletAddress   String?
+  walletConnectedAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tapSessions     TapSession[]
+  taskClaims      UserTask[]
+  withdrawals     Withdrawal[]
+  ledger          PointLedger[]
+  airdropClaims   AirdropClaim[]
+  adminActions    AdminAction[] @relation("AdminActions")
+}
+
+model TapSession {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taps       Int      @default(0)
+  points     BigInt   @default(0)
+  startedAt  DateTime @default(now())
+  lastTapAt  DateTime @default(now())
+
+  @@index([userId, startedAt])
+}
+
+model Task {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  type            TaskType
+  url             String?
+  telegramChatId  String?
+  rewardPoints    BigInt
+  active          Boolean  @default(true)
+  minLevel        Int      @default(1)
+  daily           Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  claims          UserTask[]
+}
+
+model UserTask {
+  id          String   @id @default(cuid())
+  userId      String
+  taskId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  claimedAt   DateTime @default(now())
+  status      String   @default("COMPLETED")
+
+  @@unique([userId, taskId])
+}
+
+model Airdrop {
+  id                 String   @id @default(cuid())
+  name               String
+  description        String?
+  rewardPoints       BigInt
+  minLevel           Int      @default(1)
+  minLifetimePoints  BigInt   @default(0)
+  minReferrals       Int      @default(0)
+  walletRequired     Boolean  @default(false)
+  startsAt           DateTime
+  endsAt             DateTime
+  status             AirdropStatus @default(DRAFT)
+  createdAt          DateTime @default(now())
+  claims             AirdropClaim[]
+}
+
+model AirdropClaim {
+  id          String   @id @default(cuid())
+  userId      String
+  airdropId  String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  airdrop     Airdrop  @relation(fields: [airdropId], references: [id], onDelete: Cascade)
+  claimedAt  DateTime @default(now())
+
+  @@unique([userId, airdropId])
+}
+
+model Withdrawal {
+  id             String   @id @default(cuid())
+  userId         String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  points         BigInt
+  minexAmount    Decimal  @db.Decimal(36, 9)
+  walletAddress  String
+  status         WithdrawalStatus @default(PENDING)
+  txHash         String?
+  adminNote      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model PointLedger {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      BigInt
+  balanceAfter BigInt
+  reason      String
+  refId       String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model AdminAction {
+  id          String   @id @default(cuid())
+  adminId     BigInt
+  targetUserId String?
+  targetUser  User?    @relation("AdminActions", fields: [targetUserId], references: [id])
+  action      String
+  payload     Json?
+  createdAt   DateTime @default(now())
+
+  @@index([adminId, createdAt])
+}

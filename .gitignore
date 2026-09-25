@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+.vite
+.DS_Store
+coverage
+prisma/*.db
+prisma/*.db-journal
+*.tsbuildinfo
+package-lock.json.backup

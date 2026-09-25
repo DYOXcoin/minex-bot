@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: minex-api
+    runtime: node
+    rootDir: apps/api
+    buildCommand: npm install && npx prisma generate --schema ../../prisma/schema.prisma && npm run build
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: BOT_TOKEN
+        sync: false
+      - key: BOT_USERNAME
+        sync: false
+      - key: MINI_APP_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: ADMIN_IDS
+        sync: false
+      - key: POINTS_PER_MINEX
+        value: "100000"
+      - key: WITHDRAW_MIN_POINTS
+        value: "100000"
+      - key: TONCONNECT_MANIFEST_URL
+        sync: false
+
+  - type: web
+    name: minex-web
+    runtime: static
+    rootDir: apps/web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+      - key: VITE_TONCONNECT_MANIFEST_URL
+        sync: false
