@@ -17,7 +17,7 @@ let walletUi: TonConnectUI | null = null;
 function initWallet() {
   walletUi = new TonConnectUI({
     manifestUrl: import.meta.env.VITE_TONCONNECT_MANIFEST_URL || `${location.origin}/tonconnect-manifest.json`,
-    buttonRootId: "ton-connect"
+    
   });
   return walletUi;
 }
