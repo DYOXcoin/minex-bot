@@ -16,7 +16,12 @@
     "db:seed": "npm --workspace apps/api run db:seed"
   },
   "devDependencies": {
+    "@types/pg": "^8.23.1",
     "concurrently": "^9.1.2",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^6.19.3",
+    "pg": "^8.23.0"
   }
 }
