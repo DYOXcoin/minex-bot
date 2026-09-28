@@ -10,12 +10,15 @@
     "db:seed": "tsx src/seed.ts"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.15.0",
+    "@types/pg": "^8.23.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "grammy": "^1.37.0",
     "helmet": "^8.1.0",
+    "pg": "^8.23.0",
     "zod": "^4.1.5"
   },
   "devDependencies": {
