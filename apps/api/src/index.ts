@@ -227,4 +227,4 @@ bot.command("app", ctx => ctx.reply("Open MineX:", { reply_markup: new InlineKey
 bot.catch(err => console.error("BOT", err));
 
 bot.start().catch(console.error);
-app.listen(env.PORT, () => console.log(`MineX API listening on ${env.PORT}`));
+app.listen(env.PORT, "0.0.0.0", () => console.log(`MineX API listening on ${env.PORT}`));
